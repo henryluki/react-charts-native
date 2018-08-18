@@ -1,0 +1,3 @@
+rootProject.name = 'ReactNativeChartsExample'
+
+include ':app'
