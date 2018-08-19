@@ -9,10 +9,16 @@ export default function transTransform(transforms?: Array<number>) {
   }
 
   const transformStyle = transforms.reduce((acc, transform) => {
+    if (transform.rotate !== undefined) {
+      transform.rotate = transform.rotate.replace(
+        /(\d+)deg/g,
+        ($input, $1) => $1
+      );
+    }
     return Object.assign(acc, transform);
   }, {});
   const { translateX, translateY, scaleX, scaleY, rotate } = transformStyle;
-  const transform = new Transform().transformTo(1, 0, 0, 1, 0, 0);
+  const transform = new Transform();
 
   if (translateX !== undefined || translateY !== undefined) {
     transform.move(translateX || 0, translateY || 0);

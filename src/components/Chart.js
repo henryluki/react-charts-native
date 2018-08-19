@@ -1,5 +1,5 @@
 import React from "react";
-import { Dimensions } from "react-native";
+import { Dimensions, View } from "react-native";
 
 import RAF from "raf";
 //
@@ -16,15 +16,20 @@ import Html from "../primitives/Html";
 
 const { Div } = Html;
 
-const defaultWidth = Dimensions.get("window").width;
+const defaultWidth = Dimensions.get("window").width - 40;
 const defaultHeight = 200;
 const debug = process.env.NODE_ENV === "development";
 
 export default ({ width, height, ...rest }) => {
+  const containerWidth = width || defaultWidth;
+  const containerHeight = height || defaultHeight;
+
   return (
     <Chart
-      width={width || defaultWidth}
-      height={height || defaultHeight}
+      width={containerWidth - 20}
+      height={containerHeight - 20}
+      containerWidth={containerWidth}
+      containerHeight={containerHeight}
       {...rest}
     />
   );
@@ -203,7 +208,7 @@ class Chart extends React.Component {
     if (!this.el) {
       return;
     }
-    this.dims = { left: 10, top: 10 }; // this.el.getBoundingClientRect();
+    this.dims = { left: 0, top: 0 }; // this.el.getBoundingClientRect();
     const { offset } = this.getSelectedState(this.state.chartState);
     const { offset: prevOffset } = this.getSelectedState(prevState);
 
@@ -228,7 +233,13 @@ class Chart extends React.Component {
     };
   }
   render() {
-    const { width, height, children } = this.props;
+    const {
+      containerWidth,
+      containerHeight,
+      width,
+      height,
+      children
+    } = this.props;
 
     const { gridX, gridY } = this.getSelectedState(this.state.chartState);
 
@@ -236,19 +247,14 @@ class Chart extends React.Component {
     const svgChildren = allChildren.filter(d => !d.type.isHtml);
     const htmlChildren = allChildren.filter(d => d.type.isHtml);
 
-    const containerWidth = width || defaultWidth;
-    const containerHeight = height || defaultHeight;
-
     return (
       <ChartProvider value={this.state.chartState}>
         <PointerProvider value={this.state.pointerState}>
-          <Div
-            className="ReactChart"
+          <View
             style={{
-              width: containerWidth,
-              height: containerHeight,
-              margin: "20px 0",
-              position: "relative"
+              margin: 20,
+              justifyContent: "center",
+              alignItems: "center"
             }}
           >
             <Svg
@@ -273,7 +279,8 @@ class Chart extends React.Component {
                 // onMouseLeave={this.onMouseLeave}
                 // onMouseDown={this.onMouseDown}
                 style={{
-                  transform: `translate(${gridX || 0}px, ${gridY || 0}px)`
+                  transform: `translate(${20 || 0}px, ${gridY || 0}px)`
+                  // transform: `translate(${gridX || 0}px, ${gridY || 0}px)`
                 }}
               >
                 <Rectangle
@@ -291,7 +298,7 @@ class Chart extends React.Component {
               </Group>
             </Svg>
             {htmlChildren}
-          </Div>
+          </View>
         </PointerProvider>
       </ChartProvider>
     );

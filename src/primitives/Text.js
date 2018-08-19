@@ -2,6 +2,7 @@
 import React from "react";
 import { ART } from "react-native";
 import transCssStyle from "../utils/transCssStyle";
+import transTransform from "../utils/transTransform";
 
 const defaultStyle = {
   opacity: 1,
@@ -19,17 +20,19 @@ export default class Text extends React.Component {
       ...defaultStyle,
       ...transCssStyle(style)
     };
+    const transform = transTransform(resolvedStyle.transform);
 
     return (
       <ART.Text
         {...rest}
         {...resolvedStyle}
+        transform={transform}
         font={{
           fontFamily: "Helvetica",
           fontSize: resolvedStyle.fontSize || 10
         }}
       >
-        {"a" || children}
+        {children}
       </ART.Text>
     );
   }

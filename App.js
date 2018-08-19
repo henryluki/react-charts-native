@@ -29,7 +29,7 @@ export default class App extends React.Component {
         </Chart>
 
         <Chart data={makeData()}>
-          <Axis primary type="ordinal" position="left" />
+          <Axis primary type="time" position="left" />
           <Axis type="linear" stacked position="bottom" />
           <Series type={Bar} />
           <Cursor primary />
@@ -38,7 +38,7 @@ export default class App extends React.Component {
         </Chart>
 
         <Chart data={makeData()}>
-          <Axis primary type="ordinal" />
+          <Axis primary type="time" />
           <Axis type="linear" min={0} max={0} stacked />
           <Series type={Bar} />
           <Cursor primary />

@@ -154,7 +154,7 @@ class Axis extends React.Component {
     } else {
       showGridLine = true;
     }
-    console.log("axisPath", axisPath);
+
     return (
       <Group
         className="Axis"
