@@ -7,6 +7,7 @@ import Selectors from "../utils/Selectors";
 import Utils from "../utils/Utils";
 import * as Debug from "../utils/Debug";
 import { ChartProvider, PointerProvider } from "../utils/Context";
+import { getBoundingClientRect } from "../utils/getBoundingClientRect";
 
 import Rectangle from "../primitives/Rectangle";
 import Svg from "../primitives/Svg";
@@ -16,7 +17,7 @@ import Html from "../primitives/Html";
 
 const { Div } = Html;
 
-const defaultWidth = Dimensions.get("window").width - 40;
+const defaultWidth = Dimensions.get("window").width - 20;
 const defaultHeight = 200;
 const debug = process.env.NODE_ENV === "development";
 
@@ -24,15 +25,7 @@ export default ({ width, height, ...rest }) => {
   const containerWidth = width || defaultWidth;
   const containerHeight = height || defaultHeight;
 
-  return (
-    <Chart
-      width={containerWidth - 20}
-      height={containerHeight - 20}
-      containerWidth={containerWidth}
-      containerHeight={containerHeight}
-      {...rest}
-    />
-  );
+  return <Chart width={containerWidth} height={containerHeight} {...rest} />;
 };
 
 class Chart extends React.Component {
@@ -204,11 +197,11 @@ class Chart extends React.Component {
       height
     }));
   };
-  measure = (prevProps, prevState) => {
+  measure = async (prevProps, prevState) => {
     if (!this.el) {
       return;
     }
-    this.dims = { left: 0, top: 0 }; // this.el.getBoundingClientRect();
+    this.dims = await getBoundingClientRect(this.el);
     const { offset } = this.getSelectedState(this.state.chartState);
     const { offset: prevOffset } = this.getSelectedState(prevState);
 
@@ -219,8 +212,8 @@ class Chart extends React.Component {
       this.state.chartState.dispatch(state => ({
         ...state,
         offset: {
-          left: this.el.offsetLeft,
-          top: this.el.offsetTop
+          left: this.dims.offsetLeft,
+          top: this.dims.offsetTop
         }
       }));
     }
@@ -252,9 +245,9 @@ class Chart extends React.Component {
         <PointerProvider value={this.state.pointerState}>
           <View
             style={{
-              margin: 20,
               justifyContent: "center",
-              alignItems: "center"
+              alignItems: "center",
+              position: "relative"
             }}
           >
             <Svg
@@ -262,8 +255,8 @@ class Chart extends React.Component {
                 this.el = el;
               }}
               style={{
-                width: containerWidth,
-                height: containerHeight,
+                width,
+                height,
                 overflow: "hidden"
               }}
             >
@@ -279,8 +272,7 @@ class Chart extends React.Component {
                 // onMouseLeave={this.onMouseLeave}
                 // onMouseDown={this.onMouseDown}
                 style={{
-                  transform: `translate(${20 || 0}px, ${gridY || 0}px)`
-                  // transform: `translate(${gridX || 0}px, ${gridY || 0}px)`
+                  transform: `translate(${gridX || 0}px, ${gridY || 0}px)`
                 }}
               >
                 <Rectangle

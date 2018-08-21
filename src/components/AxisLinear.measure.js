@@ -1,11 +1,12 @@
-import { positionTop, positionBottom } from './AxisLinear'
+import { positionTop, positionBottom } from "./AxisLinear";
+import { getBoundingClientRects } from "../utils/getBoundingClientRect";
 
-const fontSize = 10
+const fontSize = 10;
 
-const getPixel = d => d
-const radiansToDegrees = r => r * (180 / Math.PI)
+const getPixel = d => d;
+const radiansToDegrees = r => r * (180 / Math.PI);
 
-export default function measure () {
+export default async function measure() {
   // Measure finds the amount of overflow this axis produces and
   // updates the margins to ensure that the axis is visibility
   // Unfortunately, this currently happens after a render, but potentially
@@ -20,119 +21,120 @@ export default function measure () {
     maxLabelRotation,
     position,
     dispatch,
-    id,
-  } = this.props
+    id
+  } = this.props;
 
-  const { rotation } = this.state
+  const { rotation } = this.state;
 
-  const { visibleLabelStep } = this
+  const { visibleLabelStep } = this;
 
   if (!this.el) {
     // If the entire axis is hidden, then we need to remove the axis dimensions
     dispatch(state => {
-      const newAxes = state.axisDimensions[position] || {}
-      delete newAxes[id]
+      const newAxes = state.axisDimensions[position] || {};
+      delete newAxes[id];
       return {
         ...state,
         axisDimensions: {
           ...state.axisDimensions,
-          [position]: newAxes,
-        },
-      }
-    })
-    return
+          [position]: newAxes
+        }
+      };
+    });
+    return;
   }
 
-  const isHorizontal = position === positionTop || position === positionBottom
-  const labelDims = Array(...this.el.querySelectorAll('.tick text')).map(el => ({
-    ...el.getBoundingClientRect().toJSON(),
-  }))
+  const isHorizontal = position === positionTop || position === positionBottom;
 
-  let smallestTickGap = 100000
+  const labelDims = await getBoundingClientRects(this.tickRefs);
+
+  let smallestTickGap = 100000;
   // This is just a ridiculously large tick spacing that would never happen (hopefully)
   // If the axis is horizontal, we need to determine any necessary rotation and tick skipping
   if (isHorizontal) {
-    const tickDims = Array(...this.el.querySelectorAll('.tick')).map(el =>
-      el.getBoundingClientRect()
-    )
+    const tickDims = await getBoundingClientRects(this.tickTextRefs);
     // Determine the smallest gap in ticks on the axis
     tickDims.reduce((prev, current) => {
       if (prev) {
-        const gap = current.left - prev.left
-        smallestTickGap = gap < smallestTickGap ? gap : smallestTickGap
+        const gap = current.left - prev.left;
+        smallestTickGap = gap < smallestTickGap ? gap : smallestTickGap;
       }
-      return current
-    }, false)
+      return current;
+    }, false);
 
     // Determine the largest label on the axis
     const largestLabel = labelDims.reduce(
       (prev, current) => {
-        current._overflow = current.width - smallestTickGap
+        current._overflow = current.width - smallestTickGap;
         if (current._overflow > 0 && current._overflow > prev._overflow) {
-          return current
+          return current;
         }
-        return prev
+        return prev;
       },
       { ...labelDims[0], _overflow: 0 }
-    )
+    );
 
     // Determine axis rotation before we measure
     let newRotation = Math.min(
       Math.max(
-        Math.abs(radiansToDegrees(Math.acos(smallestTickGap / (largestLabel.width + fontSize)))),
+        Math.abs(
+          radiansToDegrees(
+            Math.acos(smallestTickGap / (largestLabel.width + fontSize))
+          )
+        ),
         0
       ),
       maxLabelRotation
-    )
+    );
 
-    newRotation = Number.isNaN(newRotation) ? 0 : Math.round(newRotation)
+    newRotation = Number.isNaN(newRotation) ? 0 : Math.round(newRotation);
     if (Math.abs(rotation - newRotation) > 10) {
       this.setState({
-        rotation: axis.position === 'top' ? -newRotation : newRotation,
-      })
+        rotation: axis.position === "top" ? -newRotation : newRotation
+      });
     }
   }
 
-  const newVisibleLabelStep = Math.ceil(fontSize / smallestTickGap)
+  const newVisibleLabelStep = Math.ceil(fontSize / smallestTickGap);
 
   if (visibleLabelStep !== newVisibleLabelStep) {
-    this.visibleLabelStep = newVisibleLabelStep
+    this.visibleLabelStep = newVisibleLabelStep;
   }
 
   if (!labelDims.length || labelDims.length !== this.ticks.length) {
-    return false
+    return false;
   }
 
-  let width = 0
-  let height = 0
-  let top = 0
-  let bottom = 0
-  let left = 0
-  let right = 0
+  let width = 0;
+  let height = 0;
+  let top = 0;
+  let bottom = 0;
+  let left = 0;
+  let right = 0;
 
   if (isHorizontal) {
     // Add width overflow from the first and last ticks
-    left = Math.ceil(getPixel(labelDims[0].width) / 2)
-    right = Math.ceil(getPixel(labelDims[labelDims.length - 1].width) / 2)
+    left = Math.ceil(getPixel(labelDims[0].width) / 2);
+    right = Math.ceil(getPixel(labelDims[labelDims.length - 1].width) / 2);
     height =
       Math.max(tickSizeInner, tickSizeOuter) + // Add tick size
       tickPadding + // Add tick padding
       // Add the height of the largest label
-      Math.max(...labelDims.map(d => Math.ceil(getPixel(d.height))))
+      Math.max(...labelDims.map(d => Math.ceil(getPixel(d.height))));
   } else {
     // Add height overflow from the first and last ticks
-    top = Math.ceil(getPixel(labelDims[0].height) / 2)
-    bottom = Math.ceil(getPixel(labelDims[labelDims.length - 1].height) / 2)
+    top = Math.ceil(getPixel(labelDims[0].height) / 2);
+    bottom = Math.ceil(getPixel(labelDims[labelDims.length - 1].height) / 2);
     width =
       Math.max(tickSizeInner, tickSizeOuter) + // Add tick size
       tickPadding + // Add tick padding
       // Add the width of the largest label
-      Math.max(...labelDims.map(d => Math.ceil(getPixel(d.width))))
+      Math.max(...labelDims.map(d => Math.ceil(getPixel(d.width))));
   }
 
   dispatch(state => {
-    const newAxes = state.axisDimensions[position] || {}
-    delete newAxes[id]
+    const newAxes = state.axisDimensions[position] || {};
+    delete newAxes[id];
     return {
       ...state,
       axisDimensions: {
@@ -145,12 +147,12 @@ export default function measure () {
             top,
             bottom,
             left,
-            right,
-          },
-        },
-      },
-    }
-  })
+            right
+          }
+        }
+      }
+    };
+  });
 
-  return true
+  return true;
 }

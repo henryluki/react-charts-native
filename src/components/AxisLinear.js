@@ -54,6 +54,11 @@ class Axis extends React.Component {
     this.state = {
       rotation: 0
     };
+    // find ref
+    this.el = null;
+    this.tickRefs = [];
+    this.tickTextRefs = [];
+
     this.measure = Utils.throttle(measure.bind(this));
     this.measureRotation = Utils.throttle(measure.bind(this));
     this.updateScale = updateScale.bind(this);
@@ -164,9 +169,7 @@ class Axis extends React.Component {
           transform:
             position === positionRight
               ? translateX(width)
-              : position === positionBottom
-                ? translateY(height)
-                : undefined
+              : position === positionBottom ? translateY(height) : undefined
         }}
       >
         <Path
@@ -180,7 +183,7 @@ class Axis extends React.Component {
         />
         <Group
           className="ticks"
-          innerRef={el => {
+          ref={el => {
             this.el = el;
           }}
           style={{
@@ -191,6 +194,9 @@ class Axis extends React.Component {
             <Group
               key={i}
               className="tick"
+              ref={ref => {
+                ref && (this.tickRefs[i] = ref);
+              }}
               style={{
                 transition: "none",
                 transform: transform(scale(tick) || 0)
@@ -232,6 +238,9 @@ class Axis extends React.Component {
               )}
               {showTicks ? (
                 <Text
+                  ref={ref => {
+                    ref && (this.tickTextRefs[i] = ref);
+                  }}
                   style={{
                     fill: dark ? "white" : "black",
                     ...axisStyles.tick,
@@ -247,18 +256,14 @@ class Axis extends React.Component {
                       ? "central"
                       : position === positionBottom
                         ? "hanging"
-                        : position === positionTop
-                          ? "alphabetic"
-                          : "central"
+                        : position === positionTop ? "alphabetic" : "central"
                   }
                   textAnchor={
                     rotation
                       ? "end"
                       : position === positionRight
                         ? "start"
-                        : position === positionLeft
-                          ? "end"
-                          : "middle"
+                        : position === positionLeft ? "end" : "middle"
                   }
                 >
                   {String(format(tick, i))}
