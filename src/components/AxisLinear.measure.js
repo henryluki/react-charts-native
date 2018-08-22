@@ -46,7 +46,13 @@ export default async function measure() {
 
   const isHorizontal = position === positionTop || position === positionBottom;
 
-  const labelDims = await getBoundingClientRects(this.tickRefs);
+  const _labelDims = await getBoundingClientRects(this.tickRefs);
+  // group 没有 width 和 height
+  const labelDims = _labelDims.map(dim => ({
+    ...dim,
+    width: 20,
+    height: 10
+  }));
 
   let smallestTickGap = 100000;
   // This is just a ridiculously large tick spacing that would never happen (hopefully)

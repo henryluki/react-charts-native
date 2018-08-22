@@ -1,3 +1,11 @@
-import { Animate } from 'react-show'
+// import { Animate } from 'react-show'
+import React from "react";
+import { View } from "react-native";
 
-export { Animate }
+class Animate extends React.Component {
+  render() {
+    return <View>{this.props.chilren}</View>;
+  }
+}
+
+export { Animate };

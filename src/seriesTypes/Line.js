@@ -1,4 +1,5 @@
 import React from "react";
+import { View } from "react-native";
 import { line } from "d3-shape";
 
 //
@@ -12,6 +13,7 @@ import {
   hoverSeries,
   hoverDatum
 } from "../utils/interactionMethods";
+import createPanResponder from "../utils/createPanResponder";
 
 import Path from "../primitives/Path";
 import Circle from "../primitives/Circle";
@@ -135,12 +137,11 @@ class Line extends React.PureComponent {
 
     const interactiveSeries = interaction === "series";
     const seriesInteractionProps = interactiveSeries
-      ? {
-          onClick: () => this.selectSeries(series),
-          onMouseEnter: () => this.hoverSeries(series),
-          onMouseMove: () => this.hoverSeries(series),
-          onMouseLeave: () => this.hoverSeries(null)
-        }
+      ? createPanResponder({
+          start: () => this.selectSeries(series),
+          move: () => this.hoverSeries(series),
+          end: () => this.hoverSeries(null)
+        })
       : {};
 
     const pointerEvents = interactiveSeries ? "all" : "none";

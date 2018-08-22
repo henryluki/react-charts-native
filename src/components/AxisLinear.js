@@ -132,6 +132,7 @@ class Axis extends React.Component {
       format,
       //
       ticks,
+      alignment,
       range: [range0, range1],
       directionMultiplier,
       tickOffset,
@@ -241,6 +242,8 @@ class Axis extends React.Component {
                   ref={ref => {
                     ref && (this.tickTextRefs[i] = ref);
                   }}
+                  y={vertical ? -7 : 0}
+                  alignment={alignment}
                   style={{
                     fill: dark ? "white" : "black",
                     ...axisStyles.tick,

@@ -6,7 +6,7 @@ import Selectors from "../utils/Selectors";
 import Utils from "../utils/Utils";
 
 import Html from "../primitives/Html";
-const { Div } = Html;
+const { Div, Span } = Html;
 
 const getLineBackgroundColor = dark =>
   dark ? "rgba(255,255,255,.3)" : "rgba(0, 26, 39, 0.3)";
@@ -16,7 +16,7 @@ const getBackgroundColor = dark =>
 class Cursor extends React.PureComponent {
   static defaultProps = {
     render: ({ axis, value, datum, primary }) => (
-      <span>
+      <Span>
         {axis.vertical
           ? typeof value !== "undefined"
             ? axis.format(axis.stacked && !primary ? datum.totalValue : value)
@@ -24,7 +24,7 @@ class Cursor extends React.PureComponent {
           : typeof value !== "undefined"
             ? axis.format(axis.stacked && !primary ? datum.totalValue : value)
             : ""}
-      </span>
+      </Span>
     ),
     snap: true,
     showLine: true,

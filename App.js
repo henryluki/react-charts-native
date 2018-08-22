@@ -27,8 +27,13 @@ export default class App extends React.Component {
           <Cursor />
           <Tooltip />
         </Chart>
+      </ScrollView>
+    );
+  }
+}
 
-        <Chart data={makeData()}>
+/**
+<Chart data={makeData()}>
           <Axis primary type="time" position="left" />
           <Axis type="linear" stacked position="bottom" />
           <Series type={Bar} />
@@ -67,10 +72,8 @@ export default class App extends React.Component {
           <Cursor />
           <Tooltip />
         </Chart>
-      </ScrollView>
-    );
-  }
-}
+
+**/
 
 function makeData() {
   return [...new Array(Math.max(Math.round(Math.random() * 5), 1))].map(
@@ -96,7 +99,7 @@ function makeSeries(i, dataType) {
     datums: [...new Array(length)].map((_, i) => {
       let x = start + i;
       if (dataType === "time") {
-        x = new Date(startDate.getTime() + 60 * 1000 * 30 * i);
+        x = new Date(startDate.getTime() + 60 * 1000 * 60 * 24 * i);
       }
       const distribution = 1.1;
       const y =

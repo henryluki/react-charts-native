@@ -8,6 +8,7 @@ import Utils from "../utils/Utils";
 import * as Debug from "../utils/Debug";
 import { ChartProvider, PointerProvider } from "../utils/Context";
 import { getBoundingClientRect } from "../utils/getBoundingClientRect";
+import createPanResponder from "../utils/createPanResponder";
 
 import Rectangle from "../primitives/Rectangle";
 import Svg from "../primitives/Svg";
@@ -25,7 +26,15 @@ export default ({ width, height, ...rest }) => {
   const containerWidth = width || defaultWidth;
   const containerHeight = height || defaultHeight;
 
-  return <Chart width={containerWidth} height={containerHeight} {...rest} />;
+  return (
+    <Chart
+      width={containerWidth - 20}
+      height={containerHeight - 20}
+      containerWidth={containerWidth}
+      containerHeight={containerHeight}
+      {...rest}
+    />
+  );
 };
 
 class Chart extends React.Component {
@@ -244,33 +253,25 @@ class Chart extends React.Component {
       <ChartProvider value={this.state.chartState}>
         <PointerProvider value={this.state.pointerState}>
           <View
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              position: "relative"
-            }}
+            style={[
+              {
+                justifyContent: "center",
+                alignItems: "center"
+              }
+            ]}
+            {...this.panHandlers}
           >
             <Svg
               ref={el => {
                 this.el = el;
               }}
               style={{
-                width,
-                height,
+                width: containerWidth,
+                height: containerHeight,
                 overflow: "hidden"
               }}
             >
               <Group
-                // onMouseEnter={e => {
-                //   e.persist();
-                //   this.onMouseMove(e);
-                // }}
-                // onMouseMove={e => {
-                //   e.persist();
-                //   this.onMouseMove(e);
-                // }}
-                // onMouseLeave={this.onMouseLeave}
-                // onMouseDown={this.onMouseDown}
                 style={{
                   transform: `translate(${gridX || 0}px, ${gridY || 0}px)`
                 }}
@@ -295,13 +296,23 @@ class Chart extends React.Component {
       </ChartProvider>
     );
   }
-  onMouseMove = Utils.throttle(e => {
-    const { clientX, clientY } = e;
+
+  onTouchStart = () => {
+    this.state.pointerState.dispatch(state => ({
+      ...state,
+      pointer: {
+        ...state.pointer,
+        down: true
+      }
+    }));
+  };
+
+  onTouchMove = Utils.throttle((e, { x0, y0 }) => {
     const { gridX, gridY } = this.getSelectedState(this.state.chartState);
 
     this.state.pointerState.dispatch(state => {
-      const x = clientX - this.dims.left - gridX;
-      const y = clientY - this.dims.top - gridY;
+      const x = x0 - this.dims.left - gridX;
+      const y = y0 - this.dims.top - gridY;
 
       const pointer = {
         ...state.pointer,
@@ -316,7 +327,8 @@ class Chart extends React.Component {
       };
     });
   });
-  onMouseLeave = () => {
+
+  onTouchEnd = () => {
     this.state.chartState.dispatch(state => ({
       ...state,
       hovered: {
@@ -328,39 +340,15 @@ class Chart extends React.Component {
       ...state,
       pointer: {
         ...state.pointer,
+        down: false,
         active: false
       }
     }));
   };
-  onMouseDown = () => {
-    document.addEventListener("mouseup", this.onMouseUp);
-    document.addEventListener("mousemove", this.onMouseMove);
 
-    this.state.pointerState.dispatch(state => ({
-      ...state,
-      pointer: {
-        ...state.pointer,
-        sourceX: state.pointer.x,
-        sourceY: state.pointer.y,
-        down: true
-      }
-    }));
-  };
-  onMouseUp = () => {
-    document.removeEventListener("mouseup", this.onMouseUp);
-    document.removeEventListener("mousemove", this.onMouseMove);
-
-    this.state.pointerState.dispatch(state => ({
-      ...state,
-      pointer: {
-        ...state.pointer,
-        down: false,
-        dragging: false,
-        released: {
-          x: state.pointer.x,
-          y: state.pointer.y
-        }
-      }
-    }));
-  };
+  panHandlers = createPanResponder({
+    start: this.onTouchStart,
+    move: this.onTouchMove,
+    end: this.onTouchEnd
+  });
 }

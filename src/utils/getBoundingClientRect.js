@@ -6,8 +6,8 @@ function transformBoundingClientRect(x, y, width, height, pageX, pageY) {
     top: pageY,
     right: pageX + width,
     bottom: pageY + height,
-    width: width,
-    height: height,
+    width,
+    height,
     offsetLeft: x,
     offsetTop: y
   };

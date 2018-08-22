@@ -25,5 +25,6 @@ export default {
   Tbody: View,
   Tr: View,
   Td: View,
-  Strong: Text
+  Strong: Text,
+  Span: Text
 };

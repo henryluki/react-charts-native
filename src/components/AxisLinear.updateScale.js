@@ -291,26 +291,24 @@ export default function updateScale(props) {
     seriesBarSize,
     domain,
     range,
+    alignment:
+      position === positionLeft
+        ? "right"
+        : position === positionRight ? "left" : "center",
     max:
       position === positionBottom
         ? -height
         : position === positionLeft
           ? width
-          : position === positionTop
-            ? height
-            : -width,
+          : position === positionTop ? height : -width,
     directionMultiplier:
       position === positionTop || position === positionLeft ? -1 : 1,
     transform: !vertical ? translateX : translateY,
     ticks: (this.ticks = !tickValues
-      ? scale.ticks
-        ? scale.ticks(...tickArguments)
-        : scale.domain()
+      ? scale.ticks ? scale.ticks(...tickArguments) : scale.domain()
       : tickValues),
     format: !tickFormat
-      ? scale.tickFormat
-        ? scale.tickFormat(...tickArguments)
-        : identity
+      ? scale.tickFormat ? scale.tickFormat(...tickArguments) : identity
       : tickFormat,
     spacing: Math.max(tickSizeInner, 0) + tickPadding
   };
